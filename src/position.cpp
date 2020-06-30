@@ -12,10 +12,16 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/tf.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 
 
 void v4l2_setting_focus(int val);
 void v4l2_setting_fps(int val);
+
+//发布pose
+ros::Publisher locationPub;
+
 
 
 int main(int argc, char **argv)
@@ -55,6 +61,7 @@ int main(int argc, char **argv)
 
     
     tf::TransformBroadcaster br;
+    locationPub = nh.advertise<geometry_msgs::PoseStamped>("zbot/imucamLocationPose",1000);
 
     
 
@@ -69,26 +76,39 @@ int main(int argc, char **argv)
     time_t start,stop;
     double totaltime;
     int fi=0;
+
     //addrobot
     map<int,Eigen::Vector3d> ledmap;
     ledmap[1]=Eigen::Vector3d(0.1579+0.08,0.01995,0.385);
     ledmap[4]=Eigen::Vector3d(-0.08532+0.08,0.13435,0.385);
     ledmap[5]=Eigen::Vector3d(-0.08532+0.08,-0.13435,0.385);
+
     robot.addrobot(1,ledmap);
     robot.Init(frame);
+
     while(nh.ok())
     {
         cap.read(frame);
-        robot.position(frame);
+        robot.position(frame,getTickCount());
+
         Eigen::Vector3d p;
-        Eigen::Vector3d rpy;
+        Eigen::Quaterniond rpy;
         robot.getRobotPose(1,p,rpy);
-        tf::Transform transform;
-        transform.setOrigin(tf::Vector3(p[0],p[1],p[2]));
-        tf::Quaternion q;
-        q.setRPY(rpy[0], rpy[1], rpy[2]);
-        transform.setRotation(q);
-        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(),  "/map","/base_footprint"));
+
+        
+
+        geometry_msgs::PoseStamped robotposeOut;
+        robotposeOut.header.frame_id="map";
+        robotposeOut.pose.position.x=p[0];
+        robotposeOut.pose.position.y=p[1];
+        robotposeOut.pose.position.z=p[2];
+        
+        robotposeOut.pose.orientation.x=rpy.x();
+        robotposeOut.pose.orientation.y=rpy.y();
+        robotposeOut.pose.orientation.z=rpy.z();
+        robotposeOut.pose.orientation.w=rpy.w();
+
+        locationPub.publish(robotposeOut);
 
          //----------------画图
         robot.pLEDtracker->drawObject(frame,LED_POSITION::System::BLOCK);

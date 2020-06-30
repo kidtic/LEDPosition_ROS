@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="LEDTrack" type="setworld" name="setworldid" args="0 $(find LEDTrack)/config/camPosi_cfg.json" output="log" >
+    <node pkg="LEDTrack" type="setworld" name="setworldid" args="0 $(find LEDTrack)/config/camPosi_cfg.json" output="screen" >
     </node>
 
 </launch>

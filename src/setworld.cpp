@@ -1,5 +1,5 @@
 
-#include "LEDTrack/RobotPosition.h"
+#include "RobotPosition.h"
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
@@ -14,6 +14,10 @@
 
 
 void v4l2_setting_focus(int val);
+void on_mouse(int event,int x,int y,int flags,void *ustc);
+
+vector<Point3f> objPoint;
+vector<Point2f> imgPoint;
 
 
 int main(int argc, char const *argv[])
@@ -54,22 +58,46 @@ int main(int argc, char const *argv[])
     cap.read(frame);
     LED_POSITION::RobotPosition robot(frame,string(argv[2]));
     v4l2_setting_focus(50);//一定要放在cap.read之后。
+
+    //鼠标事件
+    cv::namedWindow("drawAxis");
+    cv::setMouseCallback("drawAxis",on_mouse,0);//调用回调函数
+
     
     while(cap.read(frame))
     {
-        robot.drawWorldtoShow(frame);
+        //robot.drawWorldtoShow(frame);
+        robot.drawWorldtoShow(frame,imgPoint);
         int key=waitKey(10);
         if(key=='s'){
-            robot.setWorld(frame);
+            printf("save ok");
+            robot.setWorld(imgPoint);
         }
         else if(key=='q'){
             break;
         }
+        else if(key=='c'){
+            imgPoint.clear();
+        }
+
     }
 
     return 0;
 
 }
+
+void on_mouse(int event,int x,int y,int flags,void *ustc)//event鼠标事件代号，x,y鼠标坐标，flags拖拽和键盘操作的代号
+{
+
+    if (event == cv::EVENT_LBUTTONDOWN)//左键按下，读取初始坐标，并在图像上该点>处划圆
+    {
+        imgPoint.push_back(Point2f(x-2,y-4));
+    }
+    else if(event == cv::EVENT_LBUTTONUP){
+
+    }
+}
+
 
 
 void v4l2_setting_focus(int val)

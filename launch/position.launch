@@ -1,23 +1,12 @@
 <launch>
-    <arg name="model" default="$(find aimibot2_description)/urdf/aimibot.urdf"/>
-    <arg name="gui" default="false" />
-    <param name="robot_description" textfile="$(arg model)" />
-    <param name="use_gui" value="$(arg gui)" />
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <!-- important generally, but specifically utilised by the current app manager -->
-    <param name="robot/name" value="$(optenv ROBOT aimibot)"/>
-    <param name="robot/type" value="aimibot"/>
+    
     <!-- Map server -->
     <arg name="map_file" default="/home/kk/map/aimijia_demo.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
-    <param name="publish_frequency" type="double" value="20.0" />
-    </node>
-    <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
-
     <node pkg="LEDTrack" type="position" name="position" args="0 $(find LEDTrack)/config/camPosi_cfg.json" output="log" >
     </node>
+
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find LEDTrack)/config/rvizled.rviz" />
 
 </launch>
