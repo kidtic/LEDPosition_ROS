@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     v4l2_setting_focus(58);//一定要放在cap.read之后。
     v4l2_setting_fps(25);
 
-    namedWindow("src",CV_WINDOW_AUTOSIZE);
+    //namedWindow("src",CV_WINDOW_AUTOSIZE);
     //时间记录
     time_t start,stop;
     double totaltime;
@@ -112,9 +112,10 @@ int main(int argc, char **argv)
 
          //----------------画图
         robot.pLEDtracker->drawObject(frame,LED_POSITION::System::BLOCK);
+        robot.drawWorldtoShow(frame,2);
         Mat resizeimg;
-        resize(frame,resizeimg,Size(1280,720));
-        imshow("src",resizeimg);
+        //resize(frame,resizeimg,Size(1280,720));
+        //imshow("src",resizeimg);
 
         waitKey(1);
     }
