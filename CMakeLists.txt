@@ -18,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   turtlebot3_msgs
   tf
+  image_transport
+  cv_bridge
+  message_filters
 )
 
 ## System dependencies are found with CMake's conventions
@@ -167,7 +170,8 @@ find_library(RGB_LIB RGBLED_POSITION )
 # )
 
 add_executable(setworld src/setworld.cpp)
-target_link_libraries(setworld ${catkin_LIBRARIES} 
+target_link_libraries(setworld 
+  ${catkin_LIBRARIES} 
   ${OpenCV_LIBS} 
   ${RGB_LIB}
   ${EIGEN3_LIBS}
@@ -177,7 +181,8 @@ target_link_libraries(setworld ${catkin_LIBRARIES}
 add_dependencies(setworld ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(position src/position.cpp)
-target_link_libraries(position ${catkin_LIBRARIES} 
+target_link_libraries(position 
+  ${catkin_LIBRARIES} 
   ${OpenCV_LIBS} 
   ${RGB_LIB}
   ${EIGEN3_LIBS}
@@ -185,6 +190,29 @@ target_link_libraries(position ${catkin_LIBRARIES}
   g2o_core g2o_stuff g2o_types_sba g2o_types_slam2d
 )
 add_dependencies(position ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(syncpos src/syncpos.cpp)
+target_link_libraries(syncpos 
+  ${catkin_LIBRARIES} 
+  ${OpenCV_LIBS} 
+  ${RGB_LIB}
+  ${EIGEN3_LIBS}
+  ${G2O_LIBS}
+  g2o_core g2o_stuff g2o_types_sba g2o_types_slam2d
+)
+add_dependencies(syncpos ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(setWorldWithOpti src/setWorldWithOpti.cpp)
+target_link_libraries(setWorldWithOpti 
+  ${catkin_LIBRARIES} 
+  ${OpenCV_LIBS} 
+  ${RGB_LIB}
+  ${EIGEN3_LIBS}
+  ${G2O_LIBS}
+  g2o_core g2o_stuff g2o_types_sba g2o_types_slam2d
+)
+add_dependencies(setWorldWithOpti ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 #############
 ## Install ##

@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="LEDTrack" type="setWorldWithOpti" name="setWorldWithOptiid" args="0 $(find LEDTrack)/config/camPosi_cfg.json" output="screen" >
+    </node>
+
+</launch>

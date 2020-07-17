@@ -61,14 +61,14 @@ int main(int argc, char **argv)
 
     
     tf::TransformBroadcaster br;
-    locationPub = nh.advertise<geometry_msgs::PoseStamped>("zbot/imucamLocationPose",1000);
+    locationPub = nh.advertise<geometry_msgs::PoseStamped>("zbot/ledPose",1000);
 
     
 
     Mat frame;
     cap.read(frame);
     LED_POSITION::RobotPosition robot(frame,string(argv[2]));
-    v4l2_setting_focus(58);//一定要放在cap.read之后。
+    v4l2_setting_focus(60);//一定要放在cap.read之后。
     v4l2_setting_fps(25);
 
     //namedWindow("src",CV_WINDOW_AUTOSIZE);
@@ -98,10 +98,13 @@ int main(int argc, char **argv)
         
 
         geometry_msgs::PoseStamped robotposeOut;
-        robotposeOut.header.frame_id="map";
+        robotposeOut.header.frame_id="world";
+        robotposeOut.header.stamp.sec=ros::Time().now().sec;
+        robotposeOut.header.stamp.nsec=ros::Time().now().nsec;
+
         robotposeOut.pose.position.x=p[0];
         robotposeOut.pose.position.y=p[1];
-        robotposeOut.pose.position.z=p[2];
+        robotposeOut.pose.position.z=0.71;
         
         robotposeOut.pose.orientation.x=rpy.x();
         robotposeOut.pose.orientation.y=rpy.y();
@@ -111,7 +114,7 @@ int main(int argc, char **argv)
         locationPub.publish(robotposeOut);
 
          //----------------画图
-        robot.pLEDtracker->drawObject(frame,LED_POSITION::System::BLOCK);
+        robot.pLEDtracker->drawObject(frame,LED_POSITION::System::CIRCLE);
         robot.drawWorldtoShow(frame,2);
         Mat resizeimg;
         //resize(frame,resizeimg,Size(1280,720));

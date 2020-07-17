@@ -10,20 +10,33 @@
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <ros/ros.h>
 
 
 
 void v4l2_setting_focus(int val);
 void on_mouse(int event,int x,int y,int flags,void *ustc);
 
-vector<Point3f> objPoint;
+vector<Point3f> realPoint;
 vector<Point2f> imgPoint;
+geometry_msgs::PoseStamped realupp;
 
 
-
-
-int main(int argc, char const *argv[])
+void chatterCallback(const geometry_msgs::PoseStampedConstPtr& p)
 {
+    //ROS_INFO("I heard: [%s]", p->pose.position);
+    realupp=*p;
+}
+
+
+int main(int argc, char *argv[])
+{
+    ros::init(argc, argv, "ledTrack");
+    ros::NodeHandle nh;
+
+
     VideoCapture cap;
     cout<<argc<<argv[0]<<endl;
     if(argc>=3 && string(argv[1])=="rtsp"){
@@ -65,15 +78,20 @@ int main(int argc, char const *argv[])
     cv::namedWindow("drawAxis");
     cv::setMouseCallback("drawAxis",on_mouse,0);//调用回调函数
 
+
+    //optitrack
+    ros::Subscriber sub = nh.subscribe("/vrpn_client_node/RigidBody01/pose", 1000, chatterCallback);
+
     
-    while(cap.read(frame))
+    while(nh.ok())
     {
+        cap.read(frame);
         //robot.drawWorldtoShow(frame);
-        robot.drawWorldtoShow(frame,imgPoint);
+        robot.drawWorldtoShow(frame,imgPoint,realPoint);
         int key=waitKey(10);
         if(key=='s'){
             printf("save ok");
-            robot.setWorld(imgPoint);
+            robot.setWorld(imgPoint,realPoint);
         }
         else if(key=='q'){
             break;
@@ -81,6 +99,8 @@ int main(int argc, char const *argv[])
         else if(key=='c'){
             imgPoint.clear();
         }
+        
+        ros::spinOnce(); 
 
     }
 
@@ -94,6 +114,7 @@ void on_mouse(int event,int x,int y,int flags,void *ustc)//event鼠标事件代�
     if (event == cv::EVENT_LBUTTONDOWN)//左键按下，读取初始坐标，并在图像上该点>处划圆
     {
         imgPoint.push_back(Point2f(x-2,y-4));
+        realPoint.push_back(Point3f(realupp.pose.position.x,realupp.pose.position.y,realupp.pose.position.z));
     }
     else if(event == cv::EVENT_LBUTTONUP){
 
